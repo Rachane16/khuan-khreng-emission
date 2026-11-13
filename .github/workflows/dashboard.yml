@@ -1,6 +1,15 @@
 name: Collect FIRMS and deploy dashboard
 on:
   workflow_dispatch:
+    inputs:
+      backfill_start:
+        description: "Historical first Thai date YYYY-MM-DD (optional)"
+        required: false
+        type: string
+      backfill_end:
+        description: "Last Thai date inclusive, max 31 days (optional)"
+        required: false
+        type: string
   schedule:
     - cron: '7,37 * * * *'
   push:
@@ -36,6 +45,13 @@ jobs:
           else
             echo "::warning::FIRMS_MAP_KEY is not configured. Publishing saved data."
           fi
+      - name: Import requested historical dates
+        if: github.event_name == 'workflow_dispatch' && inputs.backfill_start != ''
+        env:
+          FIRMS_MAP_KEY: ${{ secrets.FIRMS_MAP_KEY }}
+          BACKFILL_START: ${{ inputs.backfill_start }}
+          BACKFILL_END: ${{ inputs.backfill_end }}
+        run: python scripts/backfill_firms.py --start-date "$BACKFILL_START" --end-date "${BACKFILL_END:-$BACKFILL_START}"
       - name: Preserve daily history
         run: |
           git config user.name "github-actions[bot]"

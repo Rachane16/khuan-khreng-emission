@@ -24,24 +24,26 @@ function currentSummary(){
  return result;
 }
 function renderStatus(){
- const s=state.status;
+ const historical=state.day?.collection_mode==="historical";
+ const s=historical?{state:state.day.data_state,sources:state.day.source_status,message:"ข้อมูลย้อนหลังของวันที่เลือก · เวลาไทย UTC+7 · ใช้ SP หรือ NRT ตามช่วงข้อมูลที่ NASA มี"}:state.status;
  const title={awaiting_key:"พร้อมแสดงแผนที่ · รอเชื่อม FIRMS MAP_KEY",ok:"อัปเดตข้อมูล FIRMS สำเร็จ",partial:"ข้อมูลดาวเทียมอัปเดตไม่ครบ",error:"การอัปเดตขัดข้อง · ใช้ข้อมูลที่บันทึกไว้"};
- $("connection-title").textContent=title[s.state]||"ยังไม่มีข้อมูลเชื่อมต่อ";
+ $("connection-title").textContent=historical?("ข้อมูลย้อนหลัง · "+(s.state==="ok"?"ครบทุกแหล่ง":"ข้อมูลบางส่วน")):title[s.state]||"ยังไม่มีข้อมูลเชื่อมต่อ";
  $("connection-detail").textContent=s.state==="awaiting_key"?"ขอบเขตและเชื้อเพลิงเป็นข้อมูลจริงของโครงการ ยังไม่มีข้อมูล Active Fires จาก API":s.message||"";
- $("connection-label").textContent={awaiting_key:"AWAITING CONNECTION",ok:"NRT DATA",partial:"PARTIAL DATA",error:"STALE DATA"}[s.state]||"OFFLINE";
+ $("connection-label").textContent=(historical?"HISTORICAL DATA":{awaiting_key:"AWAITING CONNECTION",ok:"NRT DATA",partial:"PARTIAL DATA",error:"STALE DATA"}[s.state])||"OFFLINE";
  $("connection-banner").classList.toggle("ok",s.state==="ok");
  $("source-status").innerHTML=Object.keys(SOURCE_NAMES).filter(k=>k!=="ALL").map(k=>{
  const q=s.sources?.[k]||{},v=q.state||"not_configured";
  const text={ok:"อัปเดตแล้ว",error:"ขัดข้อง",not_configured:"รอเชื่อมต่อ",unavailable:"ยังไม่มีข้อมูลใหม่"}[v]||v;
- return '<div class="source-item"><i class="source-dot '+safe(v)+'"></i><span>'+SOURCE_NAMES[k]+'</span><span class="source-state">'+safe(text)+(q.max_date?'<small>ล่าสุด '+safe(q.max_date)+'</small>':'')+'</span></div>';
+ return '<div class="source-item"><i class="source-dot '+safe(v)+'"></i><span>'+SOURCE_NAMES[k]+'</span><span class="source-state">'+safe(historical?({ok:"โหลดแล้ว",partial:"บางช่วงขาดข้อมูล",error:"ขัดข้อง",unavailable:"ไม่มีชุดข้อมูล"}[v]||text):text)+(historical?'<small>'+safe((q.api_products||[]).join(" / "))+'</small>':"")+(q.max_date?'<small>ล่าสุด '+safe(q.max_date)+'</small>':'')+'</span></div>';
  }).join("");
- $("last-update").textContent=s.last_success_utc?"อัปเดตครบทุกแหล่งล่าสุด "+clockText(s.last_success_utc)+" น.":s.last_partial_success_utc?"อัปเดตบางแหล่งล่าสุด "+clockText(s.last_partial_success_utc)+" น.":"ยังไม่มีการอัปเดตจาก FIRMS";
+ $("last-update").textContent=historical?"นำเข้าย้อนหลัง "+clockText(state.day.generated_utc)+" น.":s.last_success_utc?"อัปเดตครบทุกแหล่งล่าสุด "+clockText(s.last_success_utc)+" น.":s.last_partial_success_utc?"อัปเดตบางแหล่งล่าสุด "+clockText(s.last_partial_success_utc)+" น.":"ยังไม่มีการอัปเดตจาก FIRMS";
 }
 function renderParameters(){
  const value=(p,key)=>format(p[key],3)+(p[key+"_plus_minus"]!==undefined?" ± "+format(p[key+"_plus_minus"],3):p[key+"_range"]?" ("+p[key+"_range"].map(v=>format(v,3)).join("–")+")":"");
  $("parameter-table").innerHTML=state.parameters.fuels.map(p=>'<tr><td>'+fuelName(p.code)+'</td><td>'+value(p,"rho")+'</td><td>'+value(p,"eta")+'</td><td>'+value(p,"ef_pm25")+'</td></tr>').join("");
 }
 function render(){
+ renderStatus();
  const summary=currentSummary(),valid=!!summary;
  $("metric-count").textContent=valid?format(summary.observation_count,0):"—";
  $("metric-area").textContent=valid?format(summary.ground_area_ha):"—";
@@ -64,8 +66,8 @@ function drawFires(){
  if(state.dailyLayer){state.map.removeLayer(state.dailyLayer);state.dailyLayer=null;}
  const summary=currentSummary();
  if(!state.day || !summary){
-   setMapMessage(state.status.state==="awaiting_key"?"ยังไม่ได้เชื่อมข้อมูล FIRMS":"ยังไม่มีข้อมูลของวันที่เลือก",
-    state.status.state==="awaiting_key"?"แสดงขอบเขตและชั้นเชื้อเพลิงจริง":"เลือกวันอื่นจากประวัติ หรือรอการดึงข้อมูล",true);
+   setMapMessage(state.status.state==="awaiting_key"?"ยังไม่ได้เชื่อมข้อมูล FIRMS":"ยังไม่ได้โหลดข้อมูลย้อนหลังของวันที่เลือก",
+    state.status.state==="awaiting_key"?"แสดงขอบเขตและชั้นเชื้อเพลิงจริง":"ไม่ได้หมายความว่าไม่พบไฟ · เลือกวันที่มีประวัติ หรือให้นำเข้าย้อนหลังผ่าน GitHub Actions",true);
    return;
  }
  if(!summary.observation_count){
@@ -108,7 +110,8 @@ async function refresh(){
  $("refresh-button").disabled=true;
  try{
  [state.index,state.status]=await Promise.all([json("data/index.json"),json("data/status.json")]);
- renderStatus();await loadDay();
+ $("archive-coverage").textContent="มีข้อมูลบันทึก "+state.index.dates.length+" วัน · วันที่อื่นต้องนำเข้าย้อนหลัง";
+ await loadDay();
  }catch(e){$("connection-title").textContent="โหลดข้อมูลไม่สำเร็จ";$("connection-detail").textContent=e.message;}
  finally{$("refresh-button").disabled=false;}
 }
@@ -148,6 +151,8 @@ function exportCsv(){
 }
 async function init(){
  $("date-input").value=today();$("date-input").max=today();
+ const requestedDate=new URLSearchParams(location.search).get("date");
+ if(requestedDate&&/^\d{4}-\d{2}-\d{2}$/.test(requestedDate)&&requestedDate<=today())$("date-input").value=requestedDate;
  $("layer-controls").innerHTML=Object.keys(COLORS).map(code=>'<label><input type="checkbox" id="layer-'+code+'" '+(code!=="PEAT"?"checked":"")+'><span>'+LABELS[code][0]+'</span><i class="layer-color" style="background:'+COLORS[code]+'"></i></label>').join("");
  Object.keys(COLORS).forEach(code=>$("layer-"+code).addEventListener("change",e=>{const layer=state.landuse[code];if(layer&&state.map){if(e.target.checked)layer.addTo(state.map);else state.map.removeLayer(layer);}}));
  $("date-input").addEventListener("change",()=>{if($("date-input").value)loadDay();});

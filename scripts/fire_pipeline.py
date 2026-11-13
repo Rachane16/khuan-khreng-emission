@@ -67,6 +67,8 @@ def spatial_inputs(root=ROOT):
     return boundary, layers, indices
 
 def normalize(row, source):
+    api_product=source
+    source=source.replace("_SP","_NRT")
     if source not in SOURCES:
         raise ValueError("Unsupported source")
     lat, lon = float(row["latitude"]), float(row["longitude"])
@@ -89,7 +91,7 @@ def normalize(row, source):
         if frp is not None and not math.isfinite(frp): frp = None
     except (TypeError,ValueError):
         frp = None
-    return {"id":uid, "source":source, "satellite":satellite, "latitude":lat, "longitude":lon,
+    return {"id":uid, "source":source, "api_product":api_product, "satellite":satellite, "latitude":lat, "longitude":lon,
         "acquired_utc":timestamp.isoformat(), "local_date":timestamp.astimezone(BANGKOK).date().isoformat(),
         "scan_km":scan, "track_km":track, "confidence":str(row.get("confidence","")).strip(),
         "frp_mw":frp, "daynight":str(row.get("daynight","")), "version":str(row.get("version",""))}
@@ -112,10 +114,12 @@ def parse_csv(text, source):
         raise ValueError(f"Invalid rows in FIRMS response: {rejected}")
     return list(result.values())
 
-def fetch_source(key, source, bbox, days=3, opener=urlopen, sleeper=time.sleep):
+def fetch_source(key, source, bbox, days=3, opener=urlopen, sleeper=time.sleep, start_date=None):
     if days not in range(1,6): raise ValueError("day_range must be 1..5")
     area = ",".join(f"{n:.7f}" for n in bbox)
     url = f"https://firms.modaps.eosdis.nasa.gov/api/area/csv/{key}/{source}/{area}/{days}"
+    if start_date is not None:
+        url+="/"+date.fromisoformat(str(start_date)).isoformat()
     last = "Network error"
     for attempt in range(3):
         try:
