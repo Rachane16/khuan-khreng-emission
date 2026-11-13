@@ -123,7 +123,7 @@ def fetch_source(key, source, bbox, days=3, opener=urlopen, sleeper=time.sleep, 
     last = "Network error"
     for attempt in range(3):
         try:
-            with opener(Request(url, headers={"User-Agent":"KhuanKhreng-Emission-Dashboard/1.0"}), timeout=60) as response:
+            with opener(Request(url, headers={"User-Agent":"KuanKreng-Emission-Dashboard/1.1"}), timeout=60) as response:
                 content = response.read().decode("utf-8-sig")
             return parse_csv(content, source), content
         except HTTPError as exc:
@@ -141,7 +141,7 @@ def fetch_availability(key, opener=urlopen):
     """Only return service metadata; never expose request URLs or credentials."""
     url=f"https://firms.modaps.eosdis.nasa.gov/api/data_availability/csv/{key}/ALL"
     try:
-        with opener(Request(url, headers={"User-Agent":"KhuanKhreng-Emission-Dashboard/1.0"}), timeout=45) as response:
+        with opener(Request(url, headers={"User-Agent":"KuanKreng-Emission-Dashboard/1.1"}), timeout=45) as response:
             reader=csv.DictReader(io.StringIO(response.read().decode("utf-8-sig")))
             if not {"data_id","min_date","max_date"}.issubset(reader.fieldnames or []):
                 raise ValueError("Invalid metadata")
@@ -195,13 +195,30 @@ def summarize(observations, boundary, layers, parameters, indices=None):
         "emission_kg":sum(r["emission_kg"] for r in fuel_rows), "fuels":fuel_rows,
         "burned_geometry":mapping(transform(TO_WGS.transform,burned)) if ground_ha else None}
 
-def point_features(observations, boundary):
+def point_features(observations, boundary, layers=None, parameters=None, indices=None):
     features=[]
     for obs in observations:
         geom=footprint(obs).intersection(boundary)
         if geom.is_empty or geom.area<=0: continue
-        features.append({"type":"Feature","properties":obs,"geometry":mapping(transform(TO_WGS.transform,geom))})
+        properties=dict(obs)
+        if layers is not None and parameters is not None:
+            summary=summarize([obs],boundary,layers,parameters,indices)
+            properties["pixel_emission"]={k:summary[k] for k in
+                ("ground_area_ha","emission_without_peat_kg","peat_emission_kg","emission_kg","fuels")}
+        features.append({"type":"Feature","properties":properties,"geometry":mapping(transform(TO_WGS.transform,geom))})
     return {"type":"FeatureCollection","features":features}
+
+def index_row(day, selections, data_state, source_status=None):
+    def compact(summary):
+        return {k:summary[k] for k in ("observation_count","ground_area_ha","emission_kg",
+            "emission_without_peat_kg","peat_emission_kg","fuels")}
+    total=selections["ALL"]
+    return {"date":day,"observations":total["observation_count"],"area_ha":total["ground_area_ha"],
+        "emission_kg":total["emission_kg"],"emission_without_peat_kg":total["emission_without_peat_kg"],
+        "peat_emission_kg":total["peat_emission_kg"],"data_state":data_state,
+        "by_source":{source:compact(summary) for source,summary in selections.items()},
+        "source_status":{source:info["state"] for source,info in (source_status or {}).items()}}
+
 
 def bootstrap(root=ROOT):
     target=root/"web"/"data"
@@ -213,7 +230,7 @@ def bootstrap(root=ROOT):
     write_json(target/"parameters.json",load_json(root/"config"/"emission_parameters.json"))
     spatial=load_json(root/"config"/"spatial_dataset.json")
     audit=load_json(root/"outputs"/"tables"/"spatial_dataset_audit.json")
-    write_json(target/"project.json",{"name":"Khuan Khreng Fire & Emission","timezone":"Asia/Bangkok",
+    write_json(target/"project.json",{"name":"Kuan Kreng Fire & Emission","timezone":"Asia/Bangkok",
         "study_area_ha":audit["study_area_ha"],"bbox":spatial["bbox_wgs84"],
         "sources":SENSOR_LABELS,"geometry_method":GEOMETRY_METHOD,
         "daily_policy":"independent_daily_fuel_scenario","peat_depth_cm":10,
@@ -313,13 +330,11 @@ def collect(root=ROOT, key=None, days=3, now=None):
             "geometry_method":GEOMETRY_METHOD,"daily_policy":"independent_daily_fuel_scenario",
             "window_start_utc":start.isoformat(),"calendar_day_fully_queried":complete_window,
             "source_status":statuses,"data_state":"ok" if all_sources_current else "partial",
-            "by_source":selections,"footprints":point_features(records,boundary)}
+            "by_source":selections,"footprints":point_features(records,boundary,layers,parameters,indices)}
         write_json(target/"daily"/(day+".json"),payload)
         write_json(history/(day+".json"),{"date":day,"observations":records})
         total=selections["ALL"]
-        previous_daily[day]={"date":day,"observations":total["observation_count"],"area_ha":total["ground_area_ha"],
-            "emission_kg":total["emission_kg"],"emission_without_peat_kg":total["emission_without_peat_kg"],
-            "peat_emission_kg":total["peat_emission_kg"],"data_state":payload["data_state"]}
+        previous_daily[day]=index_row(day,selections,payload["data_state"],statuses)
     rows=[previous_daily[d] for d in sorted(previous_daily)]
     write_json(target/"index.json",{"schema_version":1,"timezone":"Asia/Bangkok",
         "generated_utc":stamp,"dates":sorted(previous_daily),"daily":rows})

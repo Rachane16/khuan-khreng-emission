@@ -2,18 +2,18 @@
 const $ = (id) => document.getElementById(id);
 const COLORS = {GRASS:"#9aa95a",LEPIRONIA:"#48aaa0",M_CAJU:"#3c7654",PADDY:"#c4ae62",PEAT:"#b2845d"};
 const LABELS = {GRASS:["หญ้า","GRASS"],LEPIRONIA:["กระจูด","LEPIRONIA"],M_CAJU:["เสม็ดขาว","MELALEUCA"],
- PADDY:["ฟางข้าว","PADDY / RICE"],PEAT:["ดินพรุ 0–10 cm","PEAT · SCENARIO"],
+ PADDY:["ข้าว","PADDY / RICE"],PEAT:["ดินพรุ 0–10 cm","PEAT"],
  M_CAJU_SURFACE_LOWLAND:["เสม็ด · surface fuel","litter + undergrowth"],
  M_CAJU_LEAVES_BARK_LOWLAND:["เสม็ด · leaves + bark","ใบและเปลือก"]};
 const SOURCE_NAMES={MODIS_NRT:"MODIS Terra / Aqua",VIIRS_SNPP_NRT:"VIIRS S-NPP",VIIRS_NOAA20_NRT:"VIIRS NOAA-20",VIIRS_NOAA21_NRT:"VIIRS NOAA-21",ALL:"ทุกดาวเทียม"};
-const state={index:{dates:[],daily:[]},status:{},parameters:null,project:null,day:null,source:"ALL",peat:true,map:null,boundary:null,landuse:{},dailyLayer:null,request:0};
+const state={index:{dates:[],daily:[]},status:{},parameters:null,project:null,day:null,source:"ALL",peat:true,map:null,boundary:null,landuse:{},dailyLayer:null,request:0,baseLayers:{},baseLayer:null};
 const format=(n,d=2)=>Number.isFinite(n)?new Intl.NumberFormat("en-US",{minimumFractionDigits:0,maximumFractionDigits:d}).format(n):"—";
 const safe=(s)=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
 const today=()=>new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Bangkok",year:"numeric",month:"2-digit",day:"2-digit"}).format(new Date());
 const dateText=(s)=>new Intl.DateTimeFormat("th-TH",{timeZone:"Asia/Bangkok",day:"numeric",month:"long",year:"numeric"}).format(new Date(s+"T12:00:00+07:00"));
 const clockText=(s)=>s?new Intl.DateTimeFormat("th-TH",{timeZone:"Asia/Bangkok",day:"numeric",month:"short",hour:"2-digit",minute:"2-digit",hour12:false}).format(new Date(s)):"—";
 async function json(path){const r=await fetch(path,{cache:"no-store"});if(!r.ok)throw new Error("ไม่พบข้อมูลที่ต้องการ ("+r.status+")");if(path.endsWith(".gz")){if(!window.DecompressionStream)throw new Error("โปรดใช้เบราว์เซอร์รุ่นใหม่เพื่อเปิดชั้นแผนที่");return new Response(r.body.pipeThrough(new DecompressionStream("gzip"))).json();}return r.json();}
-function fuelColor(code){return COLORS[code.startsWith("M_CAJU")?"M_CAJU":code]||"#8da290";}
+function fuelColor(code){if(code==="M_CAJU_LEAVES_BARK_LOWLAND")return "#83a993";return COLORS[code.startsWith("M_CAJU")?"M_CAJU":code]||"#8da290";}
 function fuelName(code){const a=LABELS[code]||[code,""];return '<span class="fuel-label"><i style="background:'+fuelColor(code)+'"></i><span class="fuel-name">'+safe(a[0])+'<small>'+safe(a[1])+'</small></span></span>';}
 function emission(summary){return summary?(state.peat?summary.emission_kg:summary.emission_without_peat_kg):null;}
 function setMapMessage(title,detail,show=true){$("map-message").hidden=!show;$("map-message").innerHTML='<span class="map-message-icon">⌖</span><strong>'+safe(title)+'</strong><span>'+safe(detail)+'</span>';}
@@ -40,7 +40,7 @@ function renderStatus(){
 }
 function renderParameters(){
  const value=(p,key)=>format(p[key],3)+(p[key+"_plus_minus"]!==undefined?" ± "+format(p[key+"_plus_minus"],3):p[key+"_range"]?" ("+p[key+"_range"].map(v=>format(v,3)).join("–")+")":"");
- $("parameter-table").innerHTML=state.parameters.fuels.map(p=>'<tr><td>'+fuelName(p.code)+'</td><td>'+value(p,"rho")+'</td><td>'+value(p,"eta")+'</td><td>'+value(p,"ef_pm25")+'</td></tr>').join("");
+ $("parameter-table").innerHTML=state.parameters.fuels.map(p=>'<tr><td>'+fuelName(p.code)+'</td><td>'+value(p,"rho")+'</td><td>'+value(p,"eta")+'</td><td>'+value(p,"ef_pm25")+'</td><td class="references">'+safe(p.references||"—")+'</td></tr>').join("");
 }
 function render(){
  renderStatus();
@@ -61,6 +61,14 @@ function render(){
  drawFires();
  renderTrend();
 }
+function pixelPopup(p){
+ const e=p.pixel_emission;
+ const metadata='<strong>'+safe(SOURCE_NAMES[p.source])+'</strong><div class="pixel-metadata">ตรวจพบ: '+safe(clockText(p.acquired_utc))+' น.<br>ชุดข้อมูล: '+safe(p.api_product||p.source)+' · Confidence: '+safe(p.confidence)+'<br>FRP: '+format(p.frp_mw)+' MW · พิกเซล '+format(p.scan_km,3)+' × '+format(p.track_km,3)+' km</div>';
+ if(!e)return metadata+'<p>ยังไม่มีผลคำนวณระดับพิกเซล</p>';
+ const rows=e.fuels.filter(r=>r.area_ha>0).map(r=>'<tr class="'+(r.peat_scenario&&!state.peat?"excluded":"")+'"><td>'+safe(LABELS[r.code]?.[0]||r.code)+'</td><td>'+format(r.area_ha,3)+'</td><td>'+(!state.peat&&r.peat_scenario?"ไม่รวม":format(r.emission_kg,3))+'</td></tr>').join("");
+ return '<div class="pixel-popup">'+metadata+'<div class="pixel-totals"><span>Active Fire ในขอบเขตศึกษา<strong>'+format(e.ground_area_ha,3)+' ha</strong></span><span>PM₂.₅ emission<strong>'+format(state.peat?e.emission_kg:e.emission_without_peat_kg,3)+' kg</strong></span></div><table><thead><tr><th>เชื้อเพลิง</th><th>ha</th><th>PM₂.₅ (kg)</th></tr></thead><tbody>'+rows+'</tbody></table><p class="pixel-note">'+(state.peat?"รวมสมมติฐานเผาดินพรุชั้น 0–10 cm":"ไม่รวมสถานการณ์ดินพรุ")+'<br>พิกเซลอาจซ้อนกัน ยอดรายวันคำนวณจากพื้นที่ไม่ซ้ำ · ชั้นเชื้อเพลิงซ้อนทับกันได้</p></div>';
+}
+
 function drawFires(){
  if(!state.map)return;
  if(state.dailyLayer){state.map.removeLayer(state.dailyLayer);state.dailyLayer=null;}
@@ -77,26 +85,55 @@ function drawFires(){
  setMapMessage("","",false);
  const selected=state.day.footprints.features.filter(f=>state.source==="ALL"||f.properties.source===state.source);
  state.dailyLayer=L.geoJSON({type:"FeatureCollection",features:selected},{
-   pane:"fire",style:{color:"#c96527",weight:1.3,fillColor:"#ed8b49",fillOpacity:.5},
-   onEachFeature:(feature,layer)=>{const p=feature.properties;layer.bindPopup('<strong>'+safe(SOURCE_NAMES[p.source])+'</strong><br>ตรวจพบ: '+safe(clockText(p.acquired_utc))+' น.<br>Confidence: '+safe(p.confidence)+'<br>FRP: '+format(p.frp_mw)+' MW<br>ขนาดพิกเซล: '+format(p.scan_km,3)+' × '+format(p.track_km,3)+' km');}
+   pane:"fire",renderer:L.svg({pane:"fire"}),style:{color:"#c96527",weight:1.3,fillColor:"#ed8b49",fillOpacity:.5},
+   onEachFeature:(feature,layer)=>{
+    layer.bindPopup(()=>pixelPopup(feature.properties),{maxWidth:470,minWidth:300,maxHeight:440});
+    layer.on("add",()=>{const el=layer.getElement();if(el){
+      el.setAttribute("role","button");el.setAttribute("tabindex","0");
+      el.setAttribute("aria-label","พิกเซล "+feature.properties.id+" "+SOURCE_NAMES[feature.properties.source]);
+      el.addEventListener("keydown",e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();layer.openPopup();}});
+    }});
+   }
  }).addTo(state.map);
 }
 function renderTrend(){
- const rows=(state.index.daily||[]).slice(-7);
- if(!rows.length){
-  $("trend").innerHTML='<div class="trend-empty"><svg viewBox="0 0 100 50" aria-hidden="true"><path d="M5 40H95M10 32l20-8 18 4 18-15 24-5" fill="none" stroke="#c1d2bc" stroke-width="2"/><circle cx="66" cy="13" r="3" fill="#94b38b"/></svg>ประวัติรายวันจะแสดงเมื่อเชื่อม FIRMS แล้ว</div>';
-  $("date-history").innerHTML="";return;
- }
- const width=340,height=150,base=115,max=Math.max(1,...rows.map(r=>emission(r)||0)),gap=width/rows.length;
- let svg='<svg viewBox="0 0 '+width+' '+height+'" role="img" aria-label="กราฟ emission รายวันของทุกดาวเทียม" width="100%" height="100%"><line x1="0" y1="'+base+'" x2="'+width+'" y2="'+base+'" stroke="#dce7d5"/>';
+ const source=state.source,last=$("trend-range").value==="custom"?$("trend-end").value:$("date-input").value;
+ const first=$("trend-range").value==="custom"?$("trend-start").value:ChartData.shift(last,-Number($("trend-range").value)+1);
+ let rows;try{rows=ChartData.series(state.index,first,last,source,state.peat);}
+ catch(e){$("trend-summary").textContent=e.message;return;}
+ const known=rows.filter(r=>r.value!==null),partial=known.filter(r=>r.state==="partial").length;
+ $("trend-subtitle").textContent=SOURCE_NAMES[source]+" · "+first+" ถึง "+last+" · kg";
+ $("trend-summary").textContent="รวมค่ารายวันที่มีข้อมูล "+format(known.reduce((s,r)=>s+r.value,0))+" kg · มีข้อมูล "+known.length+"/"+rows.length+" วัน"+(partial?" · ข้อมูลบางส่วน "+partial+" วัน":"");
+ const width=Math.max(700,rows.length*23),height=225,base=175,pad=55,plot=width-pad-12,gap=plot/rows.length;
+ const max=Math.max(1,...known.map(r=>r.value));
+ let svg='<svg viewBox="0 0 '+width+' '+height+'" style="min-width:'+width+'px" role="img" aria-label="กราฟ PM₂.₅ emission รายวันแยกเชื้อเพลิง">';
+ for(let n=0;n<=4;n++){const y=base-n*140/4;svg+='<line x1="'+pad+'" y1="'+y+'" x2="'+width+'" y2="'+y+'" stroke="#e0e8df"/><text x="'+(pad-8)+'" y="'+(y+4)+'" text-anchor="end" fill="#637d72" font-size="11">'+format(max*n/4,max<4?2:0)+'</text>';}
  rows.forEach((r,i)=>{
-  const value=emission(r)||0,h=value/max*85,x=i*gap+gap*.22,y=base-h;
-  svg+='<rect x="'+x+'" y="'+y+'" width="'+gap*.56+'" height="'+Math.max(h,1)+'" rx="3" fill="'+(r.date===$("date-input").value?"#ce8c50":"#81aa86")+'"><title>'+r.date+': '+format(value)+' kg</title></rect><text x="'+(i*gap+gap*.5)+'" y="'+(base+19)+'" text-anchor="middle" fill="#8a9c87" font-size="9">'+r.date.slice(5)+'</text>';
+  const x=pad+i*gap+gap*.15,w=gap*.7,opacity=r.state==="partial"?.5:1;
+  svg+='<g tabindex="0" role="button" data-chart-date="'+r.date+'" aria-label="'+r.date+' '+(r.value===null?"ไม่มีข้อมูล":format(r.value)+" kg")+'"><title>'+r.date+': '+(r.value===null?"ไม่มีข้อมูล":format(r.value)+" kg"+(r.state==="partial"?" · ข้อมูลบางส่วน":""))+'</title>';
+  svg+='<rect x="'+x+'" y="30" width="'+w+'" height="148" fill="transparent"/>';
+  if(r.value===null)svg+='<rect x="'+x+'" y="35" width="'+w+'" height="140" fill="#edf0ed" stroke="#cad3ca" stroke-dasharray="3 3"/>';
+  else{
+   let y=base;
+   const fuelSum=r.fuels.reduce((s,f)=>s+f.emission_kg,0);
+   if(r.value>0&&fuelSum>0)r.fuels.forEach(f=>{const h=f.emission_kg/max*140;y-=h;svg+='<rect x="'+x+'" y="'+y+'" width="'+w+'" height="'+h+'" fill="'+fuelColor(f.code)+'" opacity="'+opacity+'"><title>'+r.date+' · '+safe(LABELS[f.code]?.[0]||f.code)+': '+format(f.emission_kg)+' kg</title></rect>';});
+   else svg+='<rect x="'+x+'" y="'+(base-2)+'" width="'+w+'" height="2" fill="#4a8a6f" opacity="'+opacity+'"/>';
+  }
+
+  if(rows.length<=10||i%5===0||i===rows.length-1)svg+='<text x="'+(x+w/2)+'" y="196" text-anchor="middle" fill="#617b70" font-size="11">'+r.date.slice(5)+'</text>';
+  svg+='</g>';
  });
- $("trend").innerHTML=svg+"</svg>";
- $("date-history").innerHTML=rows.map(r=>'<button data-date="'+r.date+'" class="'+(r.date===$("date-input").value?"active":"")+'">'+r.date.slice(5)+'</button>').join("");
- $("date-history").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>{$("date-input").value=b.dataset.date;loadDay();}));
+ $("trend").innerHTML=svg+'</svg>';
+ const selectDate=day=>{$("date-input").value=day;loadDay();};
+ $("trend").querySelectorAll("[data-chart-date]").forEach(e=>{
+  e.addEventListener("click",()=>selectDate(e.dataset.chartDate));
+  e.addEventListener("keydown",event=>{if(event.key==="Enter"||event.key===" "){event.preventDefault();selectDate(e.dataset.chartDate);}});
+ });
+ $("trend-legend").innerHTML=state.parameters.fuels.filter(f=>state.peat||f.code!=="PEAT").map(f=>'<span><i style="background:'+fuelColor(f.code)+'"></i>'+safe(LABELS[f.code][0])+'</span>').join("");
+ $("date-history").innerHTML=known.slice(-7).map(r=>'<button data-date="'+r.date+'" class="'+(r.date===$("date-input").value?"active":"")+'">'+r.date.slice(5)+'</button>').join("");
+ $("date-history").querySelectorAll("button").forEach(b=>b.addEventListener("click",()=>selectDate(b.dataset.date)));
 }
+
 async function loadDay(){
  const ticket=++state.request,day=$("date-input").value;
  state.day=null;
@@ -123,7 +160,15 @@ function initializeMap(boundary){
  state.map.createPane("landuse");state.map.getPane("landuse").style.zIndex=410;
  state.map.createPane("fire");state.map.getPane("fire").style.zIndex=440;
  state.map.createPane("boundary");state.map.getPane("boundary").style.zIndex=450;state.map.getPane("boundary").style.pointerEvents="none";
- L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19}).addTo(state.map);
+ const esri='Sources: Esri, HERE, Garmin, Intermap, increment P Corp., GEBCO, USGS, FAO, NPS, NRCAN, GeoBase, IGN, Kadaster NL, Ordnance Survey, Esri Japan, METI, Esri China (Hong Kong), © OpenStreetMap contributors, and the GIS User Community';
+ state.baseLayers={
+  osm:L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",{attribution:'&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors',maxZoom:19}),
+  imagery:L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}",{attribution:"Tiles © Esri — Source: Esri, Vantor, Earthstar Geographics, and the GIS User Community",maxZoom:19}),
+  topo:L.tileLayer("https://services.arcgisonline.com/ArcGIS/rest/services/World_Topo_Map/MapServer/tile/{z}/{y}/{x}",{attribution:esri,maxZoom:19})
+ };
+ state.baseLayer=state.baseLayers.osm;state.baseLayer.addTo(state.map);
+ $("basemap-select").addEventListener("change",e=>{if(state.baseLayer)state.map.removeLayer(state.baseLayer);state.map.getContainer().dataset.basemap=e.target.value;state.baseLayer=state.baseLayers[e.target.value];state.baseLayer.addTo(state.map);});
+ 
  state.boundary=L.geoJSON(boundary,{pane:"boundary",style:{color:"#285b4b",weight:1.7,dashArray:"6 5",fill:false}}).addTo(state.map);
  state.map.fitBounds(state.boundary.getBounds(),{padding:[25,25]});
  drawFires();
@@ -158,6 +203,11 @@ async function init(){
  $("date-input").addEventListener("change",()=>{if($("date-input").value)loadDay();});
  $("sensor-select").addEventListener("change",e=>{state.source=e.target.value;render();});
  $("include-peat").addEventListener("change",e=>{state.peat=e.target.checked;render();});
+ $("trend-start").value=ChartData.shift($("date-input").value,-29);$("trend-end").value=$("date-input").value;
+ $("trend-start").max=today();$("trend-end").max=today();
+ $("trend-range").addEventListener("change",()=>{$("trend-custom").hidden=$("trend-range").value!=="custom";renderTrend();});
+ $("trend-apply").addEventListener("click",renderTrend);
+
  $("refresh-button").addEventListener("click",refresh);
  $("export-button").addEventListener("click",exportCsv);
  $("fit-map").addEventListener("click",()=>{if(state.map&&state.boundary)state.map.fitBounds(state.boundary.getBounds(),{padding:[25,25]});});

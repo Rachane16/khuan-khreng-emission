@@ -1,0 +1,1 @@
+{"date":"2026-09-03","observations":[{"id":"0f0d62864d79f7a8821fbcfb","source":"VIIRS_SNPP_NRT","api_product":"VIIRS_SNPP_NRT","satellite":"N","latitude":7.88609,"longitude":100.07971,"acquired_utc":"2026-09-03T07:09:00+00:00","local_date":"2026-09-03","scan_km":0.57,"track_km":0.43,"confidence":"n","frp_mw":5.18,"daynight":"D","version":"2.0NRT"}]}

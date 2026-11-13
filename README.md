@@ -1,4 +1,4 @@
-# Khuan Khreng Fire & Emission
+# Kuan Kreng Fire & Emission
 ต้นแบบ Web Dashboard สำหรับ Active Fires และการประมาณ PM₂.₅ รายวันในป่าพรุควนเคร็ง
 
 [เปิด Dashboard](https://rachane16.github.io/khuan-khreng-emission/) · [สถานะการทดสอบ](docs/IMPLEMENTATION_STATUS_TH.md)

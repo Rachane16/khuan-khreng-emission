@@ -1,0 +1,1 @@
+{"date":"2026-08-17","observations":[{"id":"92f3c08196de6c09580ddb93","source":"VIIRS_NOAA20_NRT","api_product":"VIIRS_NOAA20_NRT","satellite":"N20","latitude":7.96258,"longitude":100.1159,"acquired_utc":"2026-08-16T19:04:00+00:00","local_date":"2026-08-17","scan_km":0.42,"track_km":0.38,"confidence":"n","frp_mw":1.03,"daynight":"N","version":"2.0NRT"}]}

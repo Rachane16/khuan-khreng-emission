@@ -98,13 +98,11 @@ def backfill(first,last,root=m.ROOT,key=None,now=None):
             "daily_policy":"independent_daily_fuel_scenario","window_start_utc":lo.isoformat(),
             "window_end_utc":hi.isoformat(),"calendar_day_fully_queried":complete,
             "source_status":statuses,"data_state":"ok" if complete else "partial",
-            "by_source":selections,"footprints":m.point_features(records,boundary)}
+            "by_source":selections,"footprints":m.point_features(records,boundary,layers,parameters,indices)}
         m.write_json(target/"daily"/(day+".json"),payload)
         m.write_json(target/"history"/(day+".json"),{"date":day,"observations":records})
         total=selections["ALL"]
-        rows[day]={"date":day,"observations":total["observation_count"],"area_ha":total["ground_area_ha"],
-            "emission_kg":total["emission_kg"],"emission_without_peat_kg":total["emission_without_peat_kg"],
-            "peat_emission_kg":total["peat_emission_kg"],"data_state":payload["data_state"]}
+        rows[day]=m.index_row(day,selections,payload["data_state"],statuses)
         written.append(day)
         print(f"Historical Thai day {day}: {total['observation_count']} detections; {total['ground_area_ha']:.4f} ha; {payload['data_state']}")
     m.write_json(target/"index.json",{**index,"generated_utc":now.isoformat(),"dates":sorted(rows),
