@@ -1,0 +1,302 @@
+{
+  "generated_at_utc": "2026-11-13T06:31:53.107369+00:00",
+  "canonical_dataset_root": "E:\\LAB Emission\\Dataset",
+  "metric_crs": "EPSG:32647",
+  "web_crs": "EPSG:4326",
+  "boundary": {
+    "path": "E:\\LAB Emission\\Dataset\\ขอบเขตพรุควนเคร็ง\\ขอบเขตพื้นที่ป่าพรุควนเคร็ง.shp",
+    "source_crs": "EPSG:32647",
+    "record_count": 1,
+    "fields": {
+      "ORIG_FID": "int:10",
+      "Area_km": "float:19.11",
+      "Name": "str:80",
+      "stroke": "str:50",
+      "stroke_w": "float:19.11",
+      "stroke_opa": "float:19.11",
+      "Area_Ha": "float:19.11"
+    },
+    "geometry_type": "Polygon",
+    "valid": true,
+    "input_invalid_reasons": [],
+    "normalization": "unary_union of polygon components; source unchanged",
+    "raw_sum_area_source_units": 931052729.0583222,
+    "source_area_ha": 93105.27290583221,
+    "sha256": {
+      ".shp": "fab411311d8081e586febf612967fe5a8f1e9840702ddc38b70b48b67c58bed5",
+      ".shx": "56ec9b319ff608bce4a4cdb88ea6a272ffb7be823aaa39a97a27c160670d3338",
+      ".dbf": "14b26398bd4475a6754c08f006e4ee55b46f1813f63f52c880066607805286c9",
+      ".prj": "c77be1866509aabe2a1252f1985cf6edf712ac78fb01f3cc0a0c6a5a82e2f250"
+    }
+  },
+  "study_area_ha": 93105.27290583221,
+  "bbox_wgs84": [
+    99.95059721530632,
+    7.723090153072004,
+    100.25805979029882,
+    8.251171487965248
+  ],
+  "bbox_order": "west,south,east,north",
+  "layers": {
+    "GRASS": {
+      "path": "E:\\LAB Emission\\Dataset\\Landuse\\Grass_only.shp",
+      "source_crs": "EPSG:32647",
+      "record_count": 1,
+      "fields": {
+        "LU_DES_TH": "str:254",
+        "LU_DES_EN": "str:254",
+        "Area_ha": "float:19.11",
+        "ρj": "float:19.11",
+        "ηj": "float:19.11",
+        "Mj": "float:19.11",
+        "EFij": "float:19.11",
+        "Emission": "float:19.11"
+      },
+      "geometry_type": "MultiPolygon",
+      "valid": true,
+      "input_invalid_reasons": [],
+      "normalization": "unary_union of polygon components; source unchanged",
+      "raw_sum_area_source_units": 12263061.483739749,
+      "source_area_ha": 1226.3061483739743,
+      "sha256": {
+        ".shp": "c87b3db2cef48c1200ae1a833c8f8b330a7a66f794f81d2fe105a9898f5e61a8",
+        ".shx": "8a177b0c4d4d724cc02633327ace2c29c5c2a6966fe368f4132fe9cc72e80d4e",
+        ".dbf": "c684ffb590599c30c33d893425df1d3b3d35f35809ab80a85d82d8a9c1655285",
+        ".prj": "c77be1866509aabe2a1252f1985cf6edf712ac78fb01f3cc0a0c6a5a82e2f250"
+      },
+      "clipped_area_ha": 1226.3061482552262,
+      "outside_study_area_ha": 1.1874763091958237e-07,
+      "clipped_geometry_type": "MultiPolygon",
+      "fuel_codes": [
+        "GRASS"
+      ]
+    },
+    "LEPIRONIA": {
+      "path": "E:\\LAB Emission\\Dataset\\Landuse\\Lepironia_only.shp",
+      "source_crs": "EPSG:32647",
+      "record_count": 1,
+      "fields": {
+        "LU_DES_TH": "str:50",
+        "LU_DES_EN": "str:50",
+        "Area_ha": "float:19.11",
+        "ρj": "float:19.11",
+        "ηj": "float:19.11",
+        "Mj": "float:19.11",
+        "EFij": "float:19.11",
+        "Emission": "float:19.11"
+      },
+      "geometry_type": "MultiPolygon",
+      "valid": true,
+      "input_invalid_reasons": [],
+      "normalization": "unary_union of polygon components; source unchanged",
+      "raw_sum_area_source_units": 122147173.79003237,
+      "source_area_ha": 12214.71737900324,
+      "sha256": {
+        ".shp": "61cd3149a98286fd69eb8f4154d2c0d7d018c64d6c5bdc7345e6681851f58abc",
+        ".shx": "b98316eecdd2b9761a7cf8d8bbbfad6b4de863d036000f47a0c6367db1df7792",
+        ".dbf": "2344fccb62e4e6288b351a306ebeb12e0ca6df50334cb3e121dbc77cc76cfae1",
+        ".prj": "c77be1866509aabe2a1252f1985cf6edf712ac78fb01f3cc0a0c6a5a82e2f250"
+      },
+      "clipped_area_ha": 12214.224914124368,
+      "outside_study_area_ha": 0.49246487887299106,
+      "clipped_geometry_type": "MultiPolygon",
+      "fuel_codes": [
+        "LEPIRONIA"
+      ]
+    },
+    "M_CAJU": {
+      "path": "E:\\LAB Emission\\Dataset\\Landuse\\M_cajuputi_only.shp",
+      "source_crs": "EPSG:32647",
+      "record_count": 1,
+      "fields": {
+        "LU_DES_TH": "str:50",
+        "LU_DES_EN": "str:50",
+        "Area_ha": "float:19.11",
+        "ρj": "float:19.11",
+        "ηj": "float:19.11",
+        "Mj": "float:19.11",
+        "EFij": "float:19.11",
+        "Emission": "float:19.11"
+      },
+      "geometry_type": "MultiPolygon",
+      "valid": true,
+      "input_invalid_reasons": [
+        "Ring Self-intersection[636771.465515138 864622.2875]"
+      ],
+      "normalization": "unary_union of polygon components; source unchanged",
+      "raw_sum_area_source_units": 261120027.60569167,
+      "source_area_ha": 26112.002760570173,
+      "sha256": {
+        ".shp": "ee633d6891cff92ce23d9627115fab254a7adefacda34e098051a2d225bdeea9",
+        ".shx": "ecacf2cf30c45e1bcc7f36abdc127f847533667563628ba557c26751dd46fbd4",
+        ".dbf": "e37a560ce8c0a8dc721d493ae2a9aa79d70fbf3f68fa929ba6921898db7f5772",
+        ".prj": "c77be1866509aabe2a1252f1985cf6edf712ac78fb01f3cc0a0c6a5a82e2f250"
+      },
+      "clipped_area_ha": 26111.1309603146,
+      "outside_study_area_ha": 0.8718002555396593,
+      "clipped_geometry_type": "MultiPolygon",
+      "fuel_codes": [
+        "M_CAJU_SURFACE_LOWLAND",
+        "M_CAJU_LEAVES_BARK_LOWLAND"
+      ]
+    },
+    "PADDY": {
+      "path": "E:\\LAB Emission\\Dataset\\Landuse\\paddy_only.shp",
+      "source_crs": "EPSG:32647",
+      "record_count": 1,
+      "fields": {
+        "LU_DES_TH": "str:50",
+        "LU_DES_EN": "str:50",
+        "Area_ha": "float:19.11",
+        "ρj": "float:19.11",
+        "ηj": "float:19.11",
+        "Mj": "float:19.11",
+        "EFij": "float:19.11",
+        "Emission": "float:19.11"
+      },
+      "geometry_type": "MultiPolygon",
+      "valid": true,
+      "input_invalid_reasons": [
+        "Ring Self-intersection[636306.519100001 865583.986899999]"
+      ],
+      "normalization": "unary_union of polygon components; source unchanged",
+      "raw_sum_area_source_units": 79547225.06511702,
+      "source_area_ha": 7954.7225065117,
+      "sha256": {
+        ".shp": "ffe294cb689ef65d3f1739a360a8af49bdd7a1730b4d96e2d10557bc362e111d",
+        ".shx": "0a8fc9f59ffad7401daec446c6979a9b9a388e333bb80f501882cc0e539bf88c",
+        ".dbf": "ed7dc83a1f07f91b03897aaca8c75f472e7f65dfb3aa771c117a81e2b1e77940",
+        ".prj": "c77be1866509aabe2a1252f1985cf6edf712ac78fb01f3cc0a0c6a5a82e2f250"
+      },
+      "clipped_area_ha": 7954.7225057425185,
+      "outside_study_area_ha": 7.691794264353047e-07,
+      "clipped_geometry_type": "MultiPolygon",
+      "fuel_codes": [
+        "PADDY"
+      ]
+    },
+    "PEAT": {
+      "path": "E:\\LAB Emission\\Dataset\\Landuse\\Peatsoil_only.shp",
+      "source_crs": "EPSG:32647",
+      "record_count": 1,
+      "fields": {
+        "LU_DES_TH": "str:50",
+        "LU_DES_EN": "str:50",
+        "Area_ha": "float:19.11",
+        "ρj": "float:19.11",
+        "ηj": "float:19.11",
+        "Mj": "float:19.11",
+        "EFij": "float:19.11",
+        "Emission": "float:19.11"
+      },
+      "geometry_type": "MultiPolygon",
+      "valid": true,
+      "input_invalid_reasons": [],
+      "normalization": "unary_union of polygon components; source unchanged",
+      "raw_sum_area_source_units": 162051055.5995191,
+      "source_area_ha": 16205.105559951917,
+      "sha256": {
+        ".shp": "11b6b2ae32d12799a6be241bb49930f80c6d2397abe9aee3da390a3b0821044c",
+        ".shx": "ebcb4d1dc5fab8505a07312e18dbefdab6ee7a8bdfb9a90270a11603dacdfca3",
+        ".dbf": "5b3ce8193c28a2346bf3383e4261c5187f16ab0a59a5694ca1afe04abd6196d6",
+        ".prj": "c77be1866509aabe2a1252f1985cf6edf712ac78fb01f3cc0a0c6a5a82e2f250"
+      },
+      "clipped_area_ha": 16154.741367147517,
+      "outside_study_area_ha": 50.36419280440483,
+      "clipped_geometry_type": "MultiPolygon",
+      "fuel_codes": [
+        "PEAT"
+      ]
+    }
+  },
+  "pairwise_overlap": [
+    {
+      "layer_a": "GRASS",
+      "layer_b": "LEPIRONIA",
+      "overlap_ha": 5.4532136594445415,
+      "contains_peat": false,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "GRASS",
+      "layer_b": "M_CAJU",
+      "overlap_ha": 62.55416768212819,
+      "contains_peat": false,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "GRASS",
+      "layer_b": "PADDY",
+      "overlap_ha": 3.003031065637657e-10,
+      "contains_peat": false,
+      "intentional_layer_overlap": false
+    },
+    {
+      "layer_a": "GRASS",
+      "layer_b": "PEAT",
+      "overlap_ha": 102.44501637838398,
+      "contains_peat": true,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "LEPIRONIA",
+      "layer_b": "M_CAJU",
+      "overlap_ha": 11054.983895769003,
+      "contains_peat": false,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "LEPIRONIA",
+      "layer_b": "PADDY",
+      "overlap_ha": 0.0,
+      "contains_peat": false,
+      "intentional_layer_overlap": false
+    },
+    {
+      "layer_a": "LEPIRONIA",
+      "layer_b": "PEAT",
+      "overlap_ha": 4980.472956004574,
+      "contains_peat": true,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "M_CAJU",
+      "layer_b": "PADDY",
+      "overlap_ha": 315.8771993872792,
+      "contains_peat": false,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "M_CAJU",
+      "layer_b": "PEAT",
+      "overlap_ha": 8078.354725648241,
+      "contains_peat": true,
+      "intentional_layer_overlap": true
+    },
+    {
+      "layer_a": "PADDY",
+      "layer_b": "PEAT",
+      "overlap_ha": 391.32463846427237,
+      "contains_peat": true,
+      "intentional_layer_overlap": true
+    }
+  ],
+  "surface_covered_ha": 36071.29793929776,
+  "surface_unclassified_ha": 57033.97496649236,
+  "all_layers_union_ha": 43391.95381461616,
+  "all_layers_unclassified_ha": 49713.319091175166,
+  "geometry_ready": true,
+  "notes": [
+    "Inputs are separate shapefiles; this does not imply geometric non-overlap.",
+    "Areas are clipped to the supplied study boundary and calculated in EPSG:32647.",
+    "Peat overlaps are allowed as a separate soil-fuel scenario.",
+    "No priority, difference, dissolve-across-classes or fuel policy has been imposed.",
+    "Pairwise overlap totals must not be added as a unique overlap area.",
+    "No actual active-fire data or emission totals have been calculated.",
+    "User clarified that separate fuel files intentionally overlap. Preserve these overlaps; no class priority/erasure is required merely because geometries intersect."
+  ],
+  "surface_overlap_detected": true,
+  "spatial_overlay_policy_ready": true,
+  "fuel_layer_overlap_policy": "intentional_overlapping_fuel_layers",
+  "biomass_accounting_status": "Not validated by this geometry audit."
+}

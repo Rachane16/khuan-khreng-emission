@@ -1,0 +1,44 @@
+[
+  {
+    "file": "study_area.geojson",
+    "code": "boundary",
+    "original_area_ha": 93105.27290583253,
+    "simplified_area_ha": 93104.58846214261,
+    "area_difference_ha": -0.684443689930439
+  },
+  {
+    "file": "landuse_layers.geojson",
+    "code": "GRASS",
+    "original_area_ha": 1226.3061482548962,
+    "simplified_area_ha": 1225.5754313172538,
+    "area_difference_ha": -0.7307169376425445
+  },
+  {
+    "file": "landuse_layers.geojson",
+    "code": "LEPIRONIA",
+    "original_area_ha": 12214.22491412416,
+    "simplified_area_ha": 12214.851440671158,
+    "area_difference_ha": 0.626526546998322
+  },
+  {
+    "file": "landuse_layers.geojson",
+    "code": "M_CAJU",
+    "original_area_ha": 26111.130960316288,
+    "simplified_area_ha": 26105.362145505867,
+    "area_difference_ha": -5.768814810422063
+  },
+  {
+    "file": "landuse_layers.geojson",
+    "code": "PADDY",
+    "original_area_ha": 7954.722505742507,
+    "simplified_area_ha": 7953.41036623493,
+    "area_difference_ha": -1.3121395075768232
+  },
+  {
+    "file": "landuse_layers.geojson",
+    "code": "PEAT",
+    "original_area_ha": 16154.741367147615,
+    "simplified_area_ha": 16154.361272861674,
+    "area_difference_ha": -0.380094285941124
+  }
+]

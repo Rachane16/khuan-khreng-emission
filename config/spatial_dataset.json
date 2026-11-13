@@ -1,0 +1,36 @@
+{
+  "schema_version": 1,
+  "dataset_root": "E:\\LAB Emission\\Dataset",
+  "boundary_path": "E:\\LAB Emission\\Dataset\\ขอบเขตพรุควนเคร็ง\\ขอบเขตพื้นที่ป่าพรุควนเคร็ง.shp",
+  "layers": {
+    "GRASS": "E:\\LAB Emission\\Dataset\\Landuse\\Grass_only.shp",
+    "LEPIRONIA": "E:\\LAB Emission\\Dataset\\Landuse\\Lepironia_only.shp",
+    "M_CAJU": "E:\\LAB Emission\\Dataset\\Landuse\\M_cajuputi_only.shp",
+    "PADDY": "E:\\LAB Emission\\Dataset\\Landuse\\paddy_only.shp",
+    "PEAT": "E:\\LAB Emission\\Dataset\\Landuse\\Peatsoil_only.shp"
+  },
+  "metric_crs": "EPSG:32647",
+  "web_crs": "EPSG:4326",
+  "bbox_wgs84": [
+    99.95059721530632,
+    7.723090153072004,
+    100.25805979029882,
+    8.251171487965248
+  ],
+  "timezone": "Asia/Bangkok",
+  "surface_class_overlap_policy": "intentional_overlapping_fuel_layers",
+  "peat_policy": "separate_0_10_cm_scenario",
+  "prepared_geojson": {
+    "boundary": "E:\\LAB Emission\\data\\processed\\spatial\\study_area.geojson",
+    "landuse": "E:\\LAB Emission\\data\\processed\\spatial\\landuse_layers.geojson"
+  },
+  "display_geojson": {
+    "boundary": "E:\\LAB Emission\\web\\data\\study_area.geojson",
+    "landuse": "E:\\LAB Emission\\web\\data\\landuse_layers.geojson"
+  },
+  "display_geometry_note": "5 m topology-preserving simplification for visualization only. Use full prepared geometry for area/emission calculations.",
+  "spatial_overlay_policy_ready": true,
+  "study_boundary_policy": "use_supplied_boundary",
+  "fuel_overlay_method": "Intersect each fuel extent with the daily unioned Active Fire polygon; preserve between-layer overlaps.",
+  "biomass_accounting_note": "Geometric overlap is intended. Shared undergrowth biomass must not be counted twice; geometry alone does not establish independent biomass pools."
+}
