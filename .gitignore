@@ -10,3 +10,5 @@ data/processed/spatial/*.geojson
 *.tmp
 
 web/data/landuse_layers.geojson
+
+outputs/maps/*.jpg
