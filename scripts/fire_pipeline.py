@@ -176,8 +176,18 @@ def summarize(observations, boundary, layers, parameters, indices=None):
         emission = area*p["rho"]*p["eta"]*p["ef_pm25"]
         fuel_rows.append({"code":p["code"],"area_ha":area,"rho":p["rho"],"eta":p["eta"],
             "ef_pm25":p["ef_pm25"],"emission_kg":emission,"peat_scenario":p["code"]=="PEAT"})
-    surface_layers = [g for code,g in layers.items() if code!="PEAT" and layer_areas[code]>0]
-    covered = burned.intersection(unary_union(surface_layers)).area/10000 if surface_layers else 0
+    # Clip candidate parts first: unioning entire complex land-use layers for each
+    # daily/sensor summary is needlessly expensive and geometrically equivalent.
+    surface_patches=[]
+    for code,layer in layers.items():
+        if code=="PEAT" or layer_areas[code]<=0: continue
+        if indices and code in indices:
+            parts,tree=indices[code]
+            surface_patches.extend(burned.intersection(parts[int(i)])
+                for i in tree.query(burned,predicate="intersects"))
+        else:
+            surface_patches.append(burned.intersection(layer))
+    covered=unary_union(surface_patches).area/10000 if surface_patches else 0
     return {"observation_count":len(masks), "ground_area_ha":ground_ha,
         "surface_unclassified_ha":max(0,ground_ha-covered),
         "emission_without_peat_kg":sum(r["emission_kg"] for r in fuel_rows if not r["peat_scenario"]),

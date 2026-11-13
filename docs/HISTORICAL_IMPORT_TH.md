@@ -24,3 +24,17 @@ API product จริงถูกเก็บใน api_product แต่จั�
 แหล่งอ้างอิง:
 https://firms.modaps.eosdis.nasa.gov/api/area/
 https://firms.modaps.eosdis.nasa.gov/api/data_availability/
+
+## ผลตรวจจริง 13 พฤศจิกายน 2026
+นำเข้าช่วงวันไทย 15–16 สิงหาคม สำเร็จครบทั้ง 4 แหล่ง:
+- วันไทย 2026-08-15: NOAA-20 13 รายการ + NOAA-21 15 รายการ = 28 รายการ; union area 442.416095 ha
+- วันไทย 2026-08-16: 3 รายการ; union area 37.7458 ha
+- API UTC 2026-08-15 ภายใน AOI: SNPP 2, NOAA-20 11, NOAA-21 3, MODIS 0
+- บางรายการ UTC วันที่ 14 เวลา 18:00/18:45 เป็นวันไทยที่ 15; บางรายการ UTC วันที่ 15 เป็นวันไทยที่ 16
+- ใช้ MODIS_SP สำหรับสิงหาคม และ VIIRS NRT สำหรับทั้งสามดาวเทียมตาม data_availability
+- จำนวนเป็นรายการตรวจพบ ไม่ใช่จำนวนเหตุการณ์ไฟอิสระ
+- พื้นที่เป็น union ของ footprint ประมาณและตัดตาม boundary ของโครงการ
+
+ผลตรวจการเร่งประมวลผล: outputs/tables/historical_summary_verification.json
+เทียบ 10 สรุป (2 วัน × ALL และ 4 sources) กับผลเดิม ต่างสูงสุด 8.53e-13
+เวลาโหลด geometry ประมาณ 4.16 s และสรุปทั้ง 10 ชุดประมาณ 0.13 s ในเครื่องทดสอบ
